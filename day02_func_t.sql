@@ -236,4 +236,104 @@ SELECT TO_CHAR(-23,'999S'), TO_CHAR(-23,'99D99') FROM DUAL;
 
 SELECT TO_CHAR(-23,'99.9'), TO_CHAR(-23,'99.99EEEE') FROM DUAL;
 
+# 그룹함수
+- 여러개의 행 또는 테이블 전체에 적용하여 하나의 결과를 반환하는 함수
+
+select count(empno) from emp;
+
+select count(comm) from emp;
+-- null값을 무시하고 센다
+
+--관리자수를 세보기
+select count(distinct mgr) from emp;
+
+select count(*) from emp;
+-- null값을 포함하여 카운팅한다
+
+create table test(a number, b number, c number);
+
+desc test;
+insert into test values(null,null,null);
+commit;
+select * from test;
+select count(a) from test;
+select count(*) from test;
+
+select count(deptno) from dept;
+
+AVG()
+MAX()
+MIN()
+SUM()
+-- emp테이블에서 모든 SALESMAN에 대하여 급여의 평균,
+--		 최고액,최저액,합계를 구하여 출력하세요.
+SELECT AVG(SAL), MAX(SAL), MIN(SAL), SUM(SAL),COUNT(EMPNO)
+FROM EMP
+WHERE JOB='SALESMAN';
+         
+--EMP테이블에 등록되어 있는 인원수, 보너스에 NULL이 아닌 인원수,
+--		보너스의 평균,등록되어 있는 부서의 수를 구하여 출력하세요.
+SELECT COUNT(EMPNO), COUNT(COMM), AVG(COMM), COUNT(DISTINCT DEPTNO) FROM EMP;
+
+#그룹함수는 GROUP BY 절과 함께 사용된다
+EMP에서 업무별 인원수를 보여주세요
+
+SELECT  JOB, COUNT(EMPNO) FROM EMP 
+GROUP BY JOB;
+
+GROUP BY절을 이용할때는 GROUP BY 절에서 사용한 컬럼과 그룹함수만 SELECT할 수 있다.
+--17] 고객 테이블에서 직업의 종류, 각 직업에 속한 최대 마일리지 정보를 보여주세요.
+select job, max(mileage)
+from member 
+group by job;
+
+--	18] 상품 테이블에서 각 상품카테고리별(CATEGORY_FK)로 총 몇 개의 상품이 있는지 보여주세요.
+--		또한 최대 판매가와 최소 판매가를 함께 보여주세요.
+SELECT CATEGORY_FK, COUNT(PNUM), MAX(OUTPUT_PRICE), MIN(OUTPUT_PRICE)
+FROM PRODUCTS
+GROUP BY CATEGORY_FK ORDER BY 1;
+
+--	19] 상품 테이블에서 각 공급업체 코드별(EP_CODE_FK)로 공급한 상품의 평균입고가를 보여주세요.
+SELECT EP_CODE_FK, TRUNC(AVG(INPUT_PRICE)) FROM PRODUCTS
+GROUP BY EP_CODE_FK;
+
+--문제1] 사원 테이블에서 입사한 년도별로 사원 수를 보여주세요.
+SELECT HIREDATE, COUNT(EMPNO) FROM EMP GROUP BY HIREDATE;
+
+select to_char(hiredate,'YY'),count(empno) 
+from emp group by to_char(hiredate,'YY') ORDER BY 1;
+
+--문제2] 사원 테이블에서 해당년도 각 월별로 입사한 사원수를 보여주세요.
+SELECT TO_CHAR(HIREDATE,'YY-MM'), COUNT(EMPNO)
+FROM EMP
+GROUP BY TO_CHAR(HIREDATE,'YY-MM') ORDER BY 1;
+--문제3] 사원 테이블에서 업무별 최대 연봉, 최소 연봉을 출력하세요.
+SELECT JOB, MAX(SAL), MIN(SAL) FROM EMP
+GROUP BY JOB;
+#WGHO
+# HAVING 절
+- GROUP BY 의 결과에 조건을 주어 제한할 때 사용한다.
+
+20] 고객 테이블에서 직업의 종류와 각 직업에 속한 사람의 수가 
+	     2명 이상인 직업군의 정보를 보여주시오.
+SELECT JOB,COUNT(NUM) FROM MEMBER
+GROUP BY JOB HAVING COUNT(NUM) >=2;
+
+--	21] 고객 테이블에서 직업의 종류와 각 직업에 속한 최대 마일리지 정보를 보여주세요.
+--	      단, 직업군의 최대 마일리지가 0인 경우는 제외시킵시다.
+SELECT JOB, MAX(MILEAGE) FROM MEMBER
+GROUP BY JOB HAVING MAX(MILEAGE) <> 0;
+--
+--	문제1] 상품 테이블에서 각 카테고리별로 상품을 묶은 경우, 해당 카테고리의 상품이 2개인 
+--	      상품군의 정보를 보여주세요.
+SELECT CATEGORY_FK, COUNT(PNUM)
+FROM PRODUCTS
+GROUP BY CATEGORY_FK HAVING COUNT(PNUM)=2;
+--
+--	문제2] 상품 테이블에서 각 공급업체 코드별로 상품 판매가의 평균값 중 단위가 100단위로 떨어
+--	      지는 항목의 정보를 보여주세요.         
+SELECT EP_CODE_FK, AVG(OUTPUT_PRICE)
+FROM PRODUCTS
+GROUP BY EP_CODE_FK HAVING MOD(AVG(OUTPUT_PRICE),100)=0
+ORDER BY AVG(OUTPUT_PRICE) ASC;
 
